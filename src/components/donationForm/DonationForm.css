@@ -109,27 +109,13 @@
     cursor: pointer;
     font-weight: bold;
     /* margin-top: 20px; */
-    margin-left: 9vw;
+    margin-left: 25vw;
   }
   
   .submit-btn:hover {
     background: #eee;
   }
   
-  /* RESPONSIVE */
-  /* @media (max-width: 850px) {
-    .form-body {
-      flex-direction: column;
-    }
-  
-    .right-grid {
-      grid-template-columns: 1fr;
-    }
-  
-    .header-logo {
-      margin-top: 10px;
-    }
-  } */
   /* RESPONSIVE FIX FOR SMALL DEVICES */
 @media (max-width: 850px) {
   .form-body {

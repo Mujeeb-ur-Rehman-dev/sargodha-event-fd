@@ -11,15 +11,22 @@ import {
   LabelList,
 } from "recharts";
 
-const data = [
-  { name: "Budgeted", value: 96000000 },
-  { name: "Received / Pledge", value: 13500000 },
-  { name: "Balance", value: 82500000 },
-];
-
 const formatNumber = (n) => n.toLocaleString(); // 96000000 -> "96,000,000"
 
-const DonationSummaryChart = () => {
+const DonationSummaryChart = ({propData}) => {
+  console.log("propData", propData);
+  // return;
+  if(propData?.totalRemainingAll < 0 ) {
+propData.totalRemainingAll= 0
+  }
+  const data = [
+  { name: "Budgeted", value: propData?.totalRequiredAll},
+  { name: "Received / Pledge", value: propData?.totalCollectedAll },
+  { name: "Balance", value: propData?.totalRemainingAll },
+];
+
+
+console.log("DonationSummaryChart data:", data);
   return (
     <div style={{ width: "100%", height: 300, background: "#3b3b3b", padding: 16, overflowX: "hidden" }}>
       <h3 style={{ color: "#fff", textAlign: "center", marginBottom: 8 }}>

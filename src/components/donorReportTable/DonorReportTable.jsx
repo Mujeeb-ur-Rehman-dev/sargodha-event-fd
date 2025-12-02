@@ -1,85 +1,80 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import "./DonorReportTable.css";
 
-const donors = [
-  {
-    id: 1,
-    name: "Muhammad Irfan",
-    occupation: "IT Manager",
-    donorType: "Corporate",
-    contactNo: "03001234578",
-    institute: "MTJ Foundation",
-    donationFor: "0.4 Tesla Hitachi MRI (Refurb)",
-    donationType: "Cash",
-    method: "Cash",
-    pledgeDate: { dd: 0, mm: 0, yyyy: 0 },
-    amount: 5000000,
-    remaining: 0,
-  },
-  {
-    id: 2,
-    name: "Amir Khan Burki",
-    occupation: "Region Head",
-    donorType: "Individual",
-    contactNo: "03001234567",
-    institute: "MTJ Foundation",
-    donationFor: "CT Scan 64 Slices Toshiba (Japan) with Accessories",
-    donationType: "Cash",
-    method: "Online",
-    pledgeDate: { dd: 0, mm: 0, yyyy: 0 },
-    amount: 5000000,
-    remaining: 0,
-  },
-  {
-    id: 3,
-    name: "Rizwan Zahid",
-    occupation: "Coordinator CRD",
-    donorType: "Individual",
-    contactNo: "03001234567",
-    institute: "MTJ Foundation",
-    donationFor: "USG Machine Aplio-400 Platinum (Refurb)",
-    donationType: "Pledge",
-    method: "Pledge",
-    pledgeDate: { dd: 25, mm: 12, yyyy: 2025 },
-    amount: 2500000,
-    remaining: 0,
-  },
-  {
-    id: 4,
-    name: "Rizwan Zahid",
-    occupation: "Coordinator CRD",
-    donorType: "Corporate",
-    contactNo: "03001234567",
-    institute: "MTJ Foundation",
-    donationFor: "0.4 Tesla Hitachi MRI (Refurb)",
-    donationType: "Cash",
-    method: "Cheque",
-    pledgeDate: { dd: 0, mm: 0, yyyy: 0 },
-    amount: 500000,
-    remaining: 0,
-  },
-];
-
-const formatPledgeDate = ({ dd, mm, yyyy }) => {
-  if (!dd && !mm && !yyyy) return "-";
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${pad(dd)}/${pad(mm)}/${yyyy}`;
+const formatPledgeDate = (val) => {
+  if (!val) return "-";
+  if (typeof val === "string" && val.includes("-")) {
+    return val.replace(/-/g, "/");
+  }
+  if (typeof val === "object") {
+    const { dd = 0, mm = 0, yyyy = 0 } = val;
+    if (!dd && !mm && !yyyy) return "-";
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(dd)}/${pad(mm)}/${yyyy}`;
+  }
+  return String(val);
 };
 
 const formatAmount = (n) =>
   n ? n.toLocaleString("en-PK", { maximumFractionDigits: 0 }) : "0";
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:3000";
+
 const DonorReportTable = () => {
+  const [donations, setDonations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await axios.get(`${API_BASE}/donations`);
+        if (mounted) setDonations(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("DonorReportTable fetch error:", err);
+        if (mounted) setError("Failed to load donations");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchData();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="report-wrapper">
+        <div className="report-card">
+          <p style={{ color: "#fff", textAlign: "center" }}>Loading donations…</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="report-wrapper">
+        <div className="report-card">
+          <p style={{ color: "salmon", textAlign: "center" }}>{error}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="report-wrapper">
       <div className="report-card">
         <header className="report-header">
           <h2>Donor Detailed Report</h2>
-          <p className="report-subtitle">
-            Summary of pledges and donations by equipment
-          </p>
+          <p className="report-subtitle">Summary of pledges and donations by equipment</p>
         </header>
-
         <div className="report-table-container">
           <table className="report-table">
             <thead>
@@ -98,21 +93,32 @@ const DonorReportTable = () => {
               </tr>
             </thead>
             <tbody>
-              {donors.map((d) => (
-                <tr key={d.id}>
-                  <td>{d.name}</td>
-                  <td>{d.occupation}</td>
-                  <td>{d.donorType}</td>
-                  <td>{d.contactNo}</td>
-                  <td>{d.institute}</td>
-                  <td>{d.donationFor}</td>
-                  <td>{d.donationType}</td>
-                  <td>{d.method}</td>
-                  <td>{formatPledgeDate(d.pledgeDate)}</td>
-                  <td className="numeric">Rs {formatAmount(d.amount)}</td>
-                  <td className="numeric">Rs {formatAmount(d.remaining)}</td>
+              {donations.length === 0 && (
+                <tr>
+                  <td colSpan={11} style={{ textAlign: "center", padding: 20 }}>
+                    No donations yet
+                  </td>
                 </tr>
-              ))}
+              )}
+              {donations.map((d) => {
+                const donor = d.donor || {};
+                const remaining = 0;
+                return (
+                  <tr key={d._id || d.id}>
+                    <td>{donor.name || "-"}</td>
+                    <td>{donor.occupation || "-"}</td>
+                    <td>{donor.donorType || "-"}</td>
+                    <td>{donor.contactNo || "-"}</td>
+                    <td>{donor.instituteOrganization || "-"}</td>
+                    <td>{d.donationFor || "-"}</td>
+                    <td>{d.donationType || "-"}</td>
+                    <td>{d.methodMode || d.method || "-"}</td>
+                    <td>{formatPledgeDate(d.pledgeDate)}</td>
+                    <td className="numeric">Rs {formatAmount(d.amount)}</td>
+                    <td className="numeric">Rs {formatAmount(remaining)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
