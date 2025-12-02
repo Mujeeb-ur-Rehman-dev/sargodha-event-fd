@@ -7,9 +7,12 @@ function App() {
   return (
     <Router>
       <nav style={{ padding: '10px', background: '#eee' }}>
-        <Link to="/" style={{ marginRight: '10px', textDecoration:'none' }}>Form Page</Link>
-        <Link to="/data" style={{marginRight: '10px', textDecoration:'none'}}>Data Page</Link>
-        <Link to="/donor-report" style={{marginRight: '10px', textDecoration:'none'}}>Donor Report</Link>
+        <Link to="/" style={{ marginRight: '10px', textDecoration:'none', border:'2px solid black', color:'white',
+         background:'skyblue', padding:'2px' }}>Form Page</Link>
+        <Link to="/data" style={{marginRight: '10px', textDecoration:'none',border:'2px solid black', color:'white',
+         background:'skyblue', padding:'2px'}}>Data Page</Link>
+        <Link to="/donor-report" style={{marginRight: '10px', textDecoration:'none',border:'2px solid black', color:'white',
+         background:'skyblue', padding:'2px'}}>Donor Report</Link>
       </nav>
 
       <Routes>
